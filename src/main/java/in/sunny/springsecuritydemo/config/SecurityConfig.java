@@ -21,9 +21,13 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests((requests) -> ((AuthorizeHttpRequestsConfigurer.AuthorizedUrl)requests.anyRequest()).authenticated());
+        http.authorizeHttpRequests((requests) ->
+                requests.requestMatchers("/h2-console/**").permitAll()
+                        .anyRequest().authenticated());
        //To make the session stateless
         http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+        http.csrf(csrf -> csrf.disable());
+        http.headers(headers-> headers.frameOptions(frame-> frame.sameOrigin()));
         // http.formLogin(Customizer.withDefaults());
         http.httpBasic(Customizer.withDefaults());
         return (SecurityFilterChain)http.build();
@@ -32,8 +36,8 @@ public class SecurityConfig {
     @Bean
     public UserDetailsService userDetailsService() {
 
-        UserDetails user1 = User.withUsername("user1")
-                .password("{noop}user123")
+        UserDetails user1 = User.withUsername("user1") //Creating an object of inbuild class userDetails
+                .password("{noop}user123") //using noop tells Spring that this password should be saved as plain text
                 .roles("User")
                 .build();
         UserDetails user2 = User.withUsername("user2")
@@ -41,7 +45,7 @@ public class SecurityConfig {
                 .roles("User")
                 .build();
         UserDetails admin = User.withUsername("admin")
-                .password("{noop}user123")
+                .password("{noop}admin123")
                 .roles("Admin")
                 .build();
 
